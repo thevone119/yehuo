@@ -10,7 +10,6 @@ import java.util.Set;
 /**
  * @description   <分页模型>
  * @about   所有model对象必须继承该对象。
- * @author   李丽全
  * @since   2016年9月8日 13:28:17
  */
 public abstract class PageModel implements Serializable {

@@ -7,7 +7,6 @@ import java.util.List;
 /**
  * @description   <分页>
  * @about
- * @author   李丽全
  * @since   2016年9月8日 15:02:23
  */
 public class Page<T> implements Serializable {
