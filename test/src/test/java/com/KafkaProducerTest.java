@@ -17,13 +17,17 @@ import java.util.Properties;
  *
  **/
 public class KafkaProducerTest {
-    private final KafkaProducer<String,String> producer;
+    private static  KafkaProducer<String,String> producer;
     public final static String TOPIC = "test";
 
-    private KafkaProducerTest(){
+    public KafkaProducerTest(){
+
+    }
+
+    public static void  init(){
         Properties props = new Properties();
         // 服务器ip
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.43.83:9092,192.168.43.84:9092,192.168.43.62:9092");
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.72.130:9092,192.168.72.131:9092,192.168.72.132:9092");
         // 属性键值对都序列化成字符串
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
@@ -36,7 +40,7 @@ public class KafkaProducerTest {
         producer  = new KafkaProducer<>(props);
     }
 
-    void produce() {
+    static void produce() {
         int messageNo = 100;
         final int COUNT = 1000;
 
@@ -47,19 +51,22 @@ public class KafkaProducerTest {
             System.out.println(data);
             messageNo ++;
         }
-        producer.close();
+        //producer.flush();
+        //producer.close();
     }
 
 
     @Test
     public void testKafkaProducer() throws IOException {
-        new KafkaProducerTest().produce();
+        init();
+        produce();
     }
 
     //http://www.open-open.com/lib/view/open1412991579999.html
     public static void main( String[] args )
     {
-        new KafkaProducerTest().produce();
+        init();
+        produce();
     }
 
 }
