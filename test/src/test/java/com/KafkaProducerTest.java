@@ -3,6 +3,7 @@ package com;
 
 
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -17,56 +18,36 @@ import java.util.Properties;
  *
  **/
 public class KafkaProducerTest {
-    private static  KafkaProducer<String,String> producer;
-    public final static String TOPIC = "test";
+    private static Properties kafkaProps;
 
-    public KafkaProducerTest(){
+    private static void initKafka() {
+        kafkaProps = new Properties();
+        // broker url
+        kafkaProps.put("bootstrap.servers", "192.168.72.130:9092,192.168.72.131:9092,192.168.72.132:9092"); //,192.168.216.139:9092,192.168.216.140:9092
+        // request need to validate
+        kafkaProps.put("acks", "all");
+        // request failed to try
+        kafkaProps.put("retries", 0);
+        // memory cache size
+        kafkaProps.put("batch.size", 16384);
+        //
+        kafkaProps.put("linger.ms", 1);
+        kafkaProps.put("buffer.memory", 33554432);
+        // define the way of key and value serializer
+        kafkaProps.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        kafkaProps.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
     }
 
-    public static void  init(){
-        Properties props = new Properties();
-        // 服务器ip
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.72.130:9092,192.168.72.131:9092,192.168.72.132:9092");
-        // 属性键值对都序列化成字符串
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        //request.required.acks
-        //0, which means that the producer never waits for an acknowledgement from the broker (the same behavior as 0.7). This option provides the lowest latency but the weakest durability guarantees (some data will be lost when a server fails).
-        //1, which means that the producer gets an acknowledgement after the leader replica has received the data. This option provides better durability as the client waits until the server acknowledges the request as successful (only messages that were written to the now-dead leader but not yet replicated will be lost).
-        //-1, which means that the producer gets an acknowledgement after all in-sync replicas have received the data. This option provides the best durability, we guarantee that no messages will be lost as long as at least one in sync replica remains.
-        //props.put(ProducerConfig.ACKS_CONFIG,"-1");
-
-        producer  = new KafkaProducer<>(props);
-    }
-
-    static void produce() {
-        int messageNo = 100;
-        final int COUNT = 1000;
-
-        while (messageNo < COUNT) {
-            String key = String.valueOf(messageNo);
-            String data = "hello kafka message " + key;
-            producer.send(new ProducerRecord<String, String>(TOPIC, key ,data));
-            System.out.println(data);
-            messageNo ++;
+    public static void main(String[] args) {
+        initKafka();
+        Producer<String, String> producer = new KafkaProducer<String, String>(kafkaProps);
+        for (int i = 0; i < 10000; i++) {
+            producer.send(new ProducerRecord<>("my-topic", Integer.toString(i), Integer.toString(i)));
         }
-        //producer.flush();
-        //producer.close();
+        System.out.println("Message sent successfully!");
+        producer.close();
     }
 
-
-    @Test
-    public void testKafkaProducer() throws IOException {
-        init();
-        produce();
-    }
-
-    //http://www.open-open.com/lib/view/open1412991579999.html
-    public static void main( String[] args )
-    {
-        init();
-        produce();
-    }
 
 }
